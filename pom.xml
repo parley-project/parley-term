@@ -26,6 +26,7 @@
 		<!-- Written to the jar manifest as Automatic-Module-Name -->
 		<parley.moduleName>us.bringardner.parley.term</parley.moduleName>
 		<junit.version>5.11.4</junit.version>
+		<jna.version>5.19.1</jna.version>
 	</properties>
 
 	<build>
@@ -49,6 +50,12 @@
 	</build>
 
 	<dependencies>
+		<!-- The terminal on Linux, macOS and the Windows console (tty.jna) -->
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna</artifactId>
+			<version>${jna.version}</version>
+		</dependency>
 		<!-- junit-jupiter includes the API (to compile tests) and the engine (to run them) -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
