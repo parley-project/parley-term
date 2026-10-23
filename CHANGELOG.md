@@ -7,7 +7,8 @@ First release, starting at Parley's lockstep version.
 ### Added
 
 - `us.bringardner.parley.term.tty`: `Keyboard`, `TtyOps`, `Terminal`, `NativeTerminal`,
-  `StreamTerminal`, `Key` and `KeyDecoder`.
+  `StreamTerminal`, `Key` and `KeyDecoder`. `Key.shift` is Shift with a key that isn't a character
+  (Shift-Up, from ESC [ 1 ; 2 A); `isShift(code)` tests for it.
 - `us.bringardner.parley.term.tty.jna`: `JnaTty`, the terminal through JNA on Linux, macOS and the
   Windows console.
 - `us.bringardner.parley.term.line`: `LineEditor` and `Completions`.

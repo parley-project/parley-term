@@ -33,16 +33,28 @@ public final class Key {
 	public final int ch;
 	public final boolean ctrl;
 	public final boolean alt;
+	/** Shift with a key that isn't a character (Shift-Up), as the terminal reports it */
+	public final boolean shift;
 
 	public Key(Code code, int ch, boolean ctrl, boolean alt) {
+		this(code, ch, ctrl, alt, false);
+	}
+
+	public Key(Code code, int ch, boolean ctrl, boolean alt, boolean shift) {
 		this.code = code;
 		this.ch = ch;
 		this.ctrl = ctrl;
 		this.alt = alt;
+		this.shift = shift;
 	}
 
 	public static Key of(Code code) {
 		return new Key(code, 0, false, false);
+	}
+
+	/** this key with Shift (Shift-Up) */
+	public static Key shift(Code code) {
+		return new Key(code, 0, false, false, true);
 	}
 
 	public static Key ch(int c) {
@@ -71,6 +83,11 @@ public final class Key {
 		return code == Code.CHAR && !ctrl && !alt;
 	}
 
+	/** this key with Shift held (Shift-Down); is(code) is true for it too */
+	public boolean isShift(Code c) {
+		return code == c && shift;
+	}
+
 	public boolean isCtrl(char c) {
 		return code == Code.CHAR && ctrl && ch == Character.toLowerCase(c);
 	}
@@ -86,6 +103,6 @@ public final class Key {
 
 	@Override
 	public String toString() {
-		return code == Code.CHAR ? (ctrl ? "Ctrl-" : "")+(alt ? "Alt-" : "")+new String(Character.toChars(ch)) : code.name();
+		return code == Code.CHAR ? (ctrl ? "Ctrl-" : "")+(alt ? "Alt-" : "")+new String(Character.toChars(ch)) : (shift ? "Shift-" : "")+code.name();
 	}
 }

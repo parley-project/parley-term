@@ -108,6 +108,20 @@ public class TermTest {
 		assertEquals(Tui.diff(b, b), Tui.diff(a, a));
 	}
 
+	/** Shift with an arrow (ESC [ 1 ; 2 A) is that key with shift; other modifiers give the plain key. */
+	@Test
+	public void decodesShiftWithArrows() throws IOException {
+		assertTrue(one("\u001b[1;2A").isShift(Key.Code.UP));
+		assertTrue(one("\u001b[1;2B").isShift(Key.Code.DOWN));
+		assertTrue(one("\u001b[1;2B").is(Key.Code.DOWN));
+		assertTrue(one("\u001b[1;6B").isShift(Key.Code.DOWN));
+		assertTrue(one("\u001b[6;2~").isShift(Key.Code.PAGE_DOWN));
+		assertTrue(one("\u001b[1;5B").is(Key.Code.DOWN));
+		assertFalse(one("\u001b[1;5B").shift);
+		assertFalse(one("\u001b[B").shift);
+		assertEquals("Shift-UP", one("\u001b[1;2A").toString());
+	}
+
 	/** In a text field, Ctrl-W deletes back a folder (or word) and Ctrl-U clears it. */
 	@Test
 	public void textFieldDeletesBackAFolderAndClears() {

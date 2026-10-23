@@ -167,8 +167,23 @@ public final class KeyDecoder {
 			params.append((char) c);
 		}
 		String p = params.toString();
-		// modifiers (1;5A is Ctrl-Up): the key is what matters here
-		String first = p.contains(";") ? p.substring(0, p.indexOf(';')) : p;
+		Key key = csiKey(c, p.contains(";") ? p.substring(0, p.indexOf(';')) : p);
+		// modifiers (1;2A is Shift-Up, 1;5A Ctrl-Up): 1 + 1 for Shift + 2 for Alt + 4 for Ctrl. Only
+		// Shift is kept, for keys that aren't characters (Shift and the arrows extend a selection)
+		if( p.contains(";") && key.code != Key.Code.CHAR ) {
+			try {
+				int mod = Integer.parseInt(p.substring(p.indexOf(';')+1).split(";")[0])-1;
+				if( (mod & 1) != 0 ) {
+					return Key.shift(key.code);
+				}
+			} catch (NumberFormatException e) {
+				// (not a modifier: the key as it is)
+			}
+		}
+		return key;
+	}
+
+	private static Key csiKey(int c, String first) {
 		switch (c) {
 			case 'A': return Key.of(Key.Code.UP);
 			case 'B': return Key.of(Key.Code.DOWN);
