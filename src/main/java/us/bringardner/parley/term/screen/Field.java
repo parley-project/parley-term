@@ -113,6 +113,10 @@ public abstract class Field {
 			} else if( k.isCtrl('u')) {
 				text.setLength(0);
 				cursor = 0;
+			} else if( k.isCtrl('w')) {
+				int to = wordBack(text, cursor);
+				text.delete(to, cursor);
+				cursor = to;
 			} else {
 				return false;
 			}
@@ -128,6 +132,26 @@ public abstract class Field {
 			text.setLength(0);
 			text.append(value);
 			cursor = text.length();
+		}
+
+		/**
+		 * Where Ctrl-W deletes back to from cursor: the start of the word or folder name before it,
+		 * so /home/tony/projects becomes /home/tony/ and then /home/ (a / or space ends a word; the
+		 * ones just before the cursor go with the word before them).
+		 */
+		static int wordBack(CharSequence text, int cursor) {
+			int at = cursor;
+			while( at > 0 && isBreak(text.charAt(at-1))) {
+				at--;
+			}
+			while( at > 0 && !isBreak(text.charAt(at-1))) {
+				at--;
+			}
+			return at;
+		}
+
+		private static boolean isBreak(char c) {
+			return c == '/' || c == '\\' || c == ' ';
 		}
 	}
 

@@ -12,7 +12,8 @@ First release, starting at Parley's lockstep version.
   Windows console.
 - `us.bringardner.parley.term.line`: `LineEditor` and `Completions`.
 - `us.bringardner.parley.term.screen`: `Screen`, `Tui`, `Style`, `Rect`, `Theme`, `Field`,
-  `ListView` and `Dialog`.
+  `ListView` and `Dialog`. In a `Field.Text`, Ctrl-U clears it and Ctrl-W deletes back to the
+  previous `/` or space (back a folder in a path); `Dialog.Prompt` shows them (its `hint`).
 
 Taken from the console file browser trial (parley-files-viewer-tui, branch `tui-native`) and from
 fsh 1.0.0 (`NativeKeyboard`'s keyboard part, the JNA terminal code and `LineEditor`).

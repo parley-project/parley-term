@@ -205,6 +205,8 @@ public abstract class Dialog {
 		private final String label;
 		private final Field.Text field;
 		private final Consumer<String> ok;
+		/** the keys line under the field */
+		public String hint = "Enter: OK   Esc: cancel   Ctrl-U: clear   Ctrl-W: delete a word";
 
 		public Prompt(String title, String label, String initial, Consumer<String> ok) {
 			this.title = title;
@@ -215,11 +217,11 @@ public abstract class Dialog {
 
 		@Override
 		public void render(Screen screen, Rect area) {
-			int w = Math.max(50, Math.min(area.width-4, Math.max(label.length(), field.value().length()+2)+4));
+			int w = Math.max(50, Math.min(area.width-4, Math.max(Math.max(label.length(), hint.length()), field.value().length()+2)+4));
 			Rect inner = screen.box(area.centered(w, 6), title, Theme.NORMAL);
 			screen.text(inner.row(0), label, Theme.NORMAL);
 			field.render(screen, inner.row(1), true);
-			screen.text(inner.row(3), "Enter: OK   Esc: cancel", Theme.HINT);
+			screen.text(inner.row(3), hint, Theme.HINT);
 		}
 
 		@Override

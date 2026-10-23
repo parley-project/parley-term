@@ -107,4 +107,36 @@ public class TermTest {
 
 		assertEquals(Tui.diff(b, b), Tui.diff(a, a));
 	}
+
+	/** In a text field, Ctrl-W deletes back a folder (or word) and Ctrl-U clears it. */
+	@Test
+	public void textFieldDeletesBackAFolderAndClears() {
+		Field.Text f = new Field.Text("/Volumes/Data/eclipse-git/fsh", false, false);
+		f.key(Key.ctrl('w'));
+		assertEquals("/Volumes/Data/eclipse-git/", f.value());
+		f.key(Key.ctrl('w'));
+		assertEquals("/Volumes/Data/", f.value());
+		f.key(Key.ctrl('w'));
+		f.key(Key.ctrl('w'));
+		assertEquals("/", f.value());
+		f.key(Key.ctrl('w'));
+		assertEquals("", f.value());
+		f.key(Key.ctrl('w'));
+		assertEquals("", f.value());
+
+		f = new Field.Text("one two  three", false, false);
+		f.key(Key.ctrl('w'));
+		assertEquals("one two  ", f.value());
+		f.key(Key.ctrl('w'));
+		assertEquals("one ", f.value());
+		// from the middle: only what's before the cursor goes
+		f = new Field.Text("/a/bb/c", false, false);
+		f.key(Key.of(Key.Code.LEFT));
+		f.key(Key.of(Key.Code.LEFT));
+		f.key(Key.ctrl('w'));
+		assertEquals("/a//c", f.value());
+
+		f.key(Key.ctrl('u'));
+		assertEquals("", f.value());
+	}
 }
