@@ -85,6 +85,7 @@ final class UnixTty implements TtyOps {
 	private final int vtime;
 	private final long iCanon;
 	private final long iSig;
+	private final long iExten;
 	private static final long ECHO = 0x8;
 	private static final int TCSANOW = 0;
 	private static final int TCSADRAIN = 1;
@@ -120,6 +121,7 @@ final class UnixTty implements TtyOps {
 			vtime = 17;
 			iCanon = 0x100;
 			iSig = 0x80;
+			iExten = 0x400;
 			tiocgwinsz = 0x40087468L;
 			fionread = 0x4004667fL;
 			sigBlock = 1;
@@ -131,6 +133,7 @@ final class UnixTty implements TtyOps {
 			vtime = 5;
 			iCanon = 0x2;
 			iSig = 0x1;
+			iExten = 0x8000;
 			tiocgwinsz = 0x5413L;
 			fionread = 0x541BL;
 			sigBlock = 0;
@@ -181,7 +184,9 @@ final class UnixTty implements TtyOps {
 		}
 		Memory raw = new Memory(128);
 		raw.write(0, orig.getByteArray(0, 128), 0, 128);
-		long flags = lflag(raw) & ~(ECHO | iCanon);
+		// IEXTEN off as well (as cfmakeraw): with it, macOS's terminal driver takes Ctrl-V and Ctrl-O
+		// for itself even in raw mode, so a program never gets them
+		long flags = lflag(raw) & ~(ECHO | iCanon | iExten);
 		if( keysNotSignals ) {
 			flags &= ~iSig;
 		}
