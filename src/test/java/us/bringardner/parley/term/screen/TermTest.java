@@ -152,10 +152,26 @@ public class TermTest {
 		f.key(Key.ctrl('w'));
 		f.key(Key.ctrl('w'));
 		assertEquals("/", f.value());
+		// never the root
 		f.key(Key.ctrl('w'));
-		assertEquals("", f.value());
+		assertEquals("/", f.value());
+		// a Windows drive and share are roots too
+		f = new Field.Text("C:\\Users\\tony\\Documents", false, false);
 		f.key(Key.ctrl('w'));
-		assertEquals("", f.value());
+		assertEquals("C:\\Users\\tony\\", f.value());
+		f.key(Key.ctrl('w'));
+		f.key(Key.ctrl('w'));
+		assertEquals("C:\\", f.value());
+		f.key(Key.ctrl('w'));
+		assertEquals("C:\\", f.value());
+		f = new Field.Text("D:/data", false, false);
+		f.key(Key.ctrl('w'));
+		f.key(Key.ctrl('w'));
+		assertEquals("D:/", f.value());
+		f = new Field.Text("\\\\server\\share\\docs", false, false);
+		f.key(Key.ctrl('w'));
+		f.key(Key.ctrl('w'));
+		assertEquals("\\\\server\\share\\", f.value());
 
 		f = new Field.Text("one two  three", false, false);
 		f.key(Key.ctrl('w'));

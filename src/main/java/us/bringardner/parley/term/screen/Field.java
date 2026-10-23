@@ -137,17 +137,43 @@ public abstract class Field {
 		/**
 		 * Where Ctrl-W deletes back to from cursor: the start of the word or folder name before it,
 		 * so /home/tony/projects becomes /home/tony/ and then /home/ (a / or space ends a word; the
-		 * ones just before the cursor go with the word before them).
+		 * ones just before the cursor go with the word before them). It never deletes a path's
+		 * root: /, a Windows drive (C:\ or C:/) or share (\\server\share\).
 		 */
 		static int wordBack(CharSequence text, int cursor) {
+			int root = rootLength(text);
+			if( cursor <= root ) {
+				return cursor;
+			}
 			int at = cursor;
-			while( at > 0 && isBreak(text.charAt(at-1))) {
+			while( at > root && isBreak(text.charAt(at-1))) {
 				at--;
 			}
-			while( at > 0 && !isBreak(text.charAt(at-1))) {
+			while( at > root && !isBreak(text.charAt(at-1))) {
 				at--;
 			}
 			return at;
+		}
+
+		/** the length of the root text starts with (/, C:\, \\server\share\), or 0 */
+		static int rootLength(CharSequence text) {
+			int n = text.length();
+			if( n >= 2 && Character.isLetter(text.charAt(0)) && text.charAt(1) == ':' ) {
+				return n >= 3 && (text.charAt(2) == '\\' || text.charAt(2) == '/') ? 3 : 2;
+			}
+			if( n >= 2 && text.charAt(0) == '\\' && text.charAt(1) == '\\' ) {
+				// \\server\share\ (to the separator after the share, or all of it)
+				int seps = 0;
+				for(int i = 2; i < n; i++) {
+					if( text.charAt(i) == '\\' || text.charAt(i) == '/' ) {
+						if( ++seps == 2 ) {
+							return i+1;
+						}
+					}
+				}
+				return n;
+			}
+			return n >= 1 && (text.charAt(0) == '/' || text.charAt(0) == '\\') ? 1 : 0;
 		}
 
 		private static boolean isBreak(char c) {
