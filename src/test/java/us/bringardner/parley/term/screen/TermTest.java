@@ -122,6 +122,25 @@ public class TermTest {
 		assertEquals("Shift-UP", one("\u001b[1;2A").toString());
 	}
 
+	/**
+	 * While a full-screen program's screen is up, Ctrl-C and Ctrl-Z are its keys: the shell's
+	 * handler of them (fsh's, which ends the command at Ctrl-C) is set aside, and back after.
+	 */
+	@Test
+	public void theScreenTakesCtrlCFromTheShell() throws IOException {
+		Keyboard.ControlKeys shell = key -> true;
+		Keyboard.controlKeys = shell;
+		try {
+			NativeTerminal t = new NativeTerminal(false);
+			t.startScreen();
+			assertNull(Keyboard.controlKeys);
+			t.endScreen();
+			assertTrue(Keyboard.controlKeys == shell);
+		} finally {
+			Keyboard.controlKeys = null;
+		}
+	}
+
 	/** In a text field, Ctrl-W deletes back a folder (or word) and Ctrl-U clears it. */
 	@Test
 	public void textFieldDeletesBackAFolderAndClears() {

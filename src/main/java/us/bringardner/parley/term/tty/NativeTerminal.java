@@ -39,6 +39,8 @@ public class NativeTerminal implements Terminal {
 	private final Keyboard keys = new Keyboard();
 	private final OutputStream out = new FileOutputStream(FileDescriptor.out);
 	private final boolean ownSignals;
+	/** the shell's handler of Ctrl-C and Ctrl-Z (fsh's), set aside while the screen is up */
+	private Keyboard.ControlKeys shellKeys;
 
 	/**
 	 * @param ownSignals read Ctrl-C and Ctrl-Z as keys (a program on its own; inside a shell that
@@ -93,11 +95,17 @@ public class NativeTerminal implements Terminal {
 		if( ownSignals ) {
 			Keyboard.signalKeys(true);
 		}
+		// Ctrl-C and Ctrl-Z are this program's keys while its screen is up: a shell that watches for
+		// them while a command runs (fsh) would otherwise end the program at Ctrl-C
+		shellKeys = Keyboard.controlKeys;
+		Keyboard.controlKeys = null;
 		keys.available();
 	}
 
 	@Override
 	public void endScreen() throws IOException {
+		Keyboard.controlKeys = shellKeys;
+		shellKeys = null;
 		if( ownSignals ) {
 			Keyboard.signalKeys(false);
 		}

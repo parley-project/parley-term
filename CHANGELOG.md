@@ -11,6 +11,9 @@ First release, starting at Parley's lockstep version.
   (Shift-Up, from ESC [ 1 ; 2 A); `isShift(code)` tests for it.
   Raw mode turns IEXTEN off too (as `cfmakeraw` does): with it, macOS's terminal driver kept Ctrl-V
   and Ctrl-O for itself, so a program never got them.
+  While a `NativeTerminal`'s screen is up, Ctrl-C and Ctrl-Z are the program's keys: a shell's
+  handler of them (`Keyboard.controlKeys`, fsh's) is set aside until the screen ends, so fsh no
+  longer ends the browser at Ctrl-C.
 - `us.bringardner.parley.term.tty.jna`: `JnaTty`, the terminal through JNA on Linux, macOS and the
   Windows console.
 - `us.bringardner.parley.term.line`: `LineEditor` and `Completions`.
