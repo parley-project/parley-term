@@ -25,10 +25,15 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.function.BooleanSupplier;
 
 /**
  * A terminal that's only streams and a size: an SSH channel, or a test. Input is read only as
  * far as it's there (available()), so nothing typed after the program ends is taken.
+ * <p>
+ * available() can't tell the end of the input from a pause, so a read with a timeout only sees
+ * the end when the {@code ended} check given to the constructor says so (an SSH channel that was
+ * closed, say). A read without a timeout waits in {@link InputStream#read()}, which does see it.
  */
 public class StreamTerminal implements Terminal {
 
@@ -37,19 +42,38 @@ public class StreamTerminal implements Terminal {
 	private final InputStream in;
 	private final OutputStream out;
 	private final int[] size;
+	private final BooleanSupplier ended;
 
 	public StreamTerminal(InputStream in, OutputStream out, int columns, int rows) {
+		this(in, out, columns, rows, null);
+	}
+
+	/**
+	 * @param ended true once the input has ended (and nothing more will come), so a read with a
+	 *              timeout returns -1 instead of waiting; null if there's no way to tell
+	 * @since 2.0.0
+	 */
+	public StreamTerminal(InputStream in, OutputStream out, int columns, int rows, BooleanSupplier ended) {
 		this.in = in;
 		this.out = out;
 		this.size = new int[] {columns, rows};
+		this.ended = ended;
 	}
 
 	@Override
 	public int read(int timeoutMs) throws IOException {
-		long end = timeoutMs < 0 ? Long.MAX_VALUE : System.currentTimeMillis()+timeoutMs;
+		if( timeoutMs < 0 ) {
+			// waiting for the next byte whatever happens: whatever comes is for this program
+			return in.read();
+		}
+		long end = System.currentTimeMillis()+timeoutMs;
 		while(true) {
 			if( in.available() > 0 ) {
 				return in.read();
+			}
+			if( ended != null && ended.getAsBoolean()) {
+				// it may have ended just after available() was asked
+				return in.available() > 0 ? in.read() : -1;
 			}
 			if( System.currentTimeMillis() >= end ) {
 				return -2;

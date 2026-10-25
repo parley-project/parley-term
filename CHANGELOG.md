@@ -23,3 +23,10 @@ First release, starting at Parley's lockstep version.
 
 Taken from the console file browser trial (parley-files-viewer-tui, branch `tui-native`) and from
 fsh 1.0.0 (`NativeKeyboard`'s keyboard part, the JNA terminal code and `LineEditor`).
+
+### Fixed
+
+- `StreamTerminal` sees the end of its input: a read without a timeout waits in `read()` (which
+  returns -1 at the end), and the new constructor's `ended` check makes a timed read return -1
+  once the input has ended. Before, `available()` (0 at the end) hid it, so a full-screen program
+  on a closed stream kept polling instead of stopping.
